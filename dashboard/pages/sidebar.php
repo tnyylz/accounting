@@ -65,7 +65,7 @@ if (isset($_SESSION['kullanici_id'])) {
           $sofor = mysqli_query($conn,"SELECT * FROM sofor WHERE sofor.kullanici_id = '$id' ");
           $asd = mysqli_fetch_array($sofor);
           $sofor_id = $asd['sofor_id'];
-
+          $_SESSION['sofor_id'] = $sofor_id;
           $result = mysqli_query($conn, "
               SELECT bayi.*
               FROM bayi

@@ -77,7 +77,7 @@
             <td><?php echo $row['satilan_miktar']; ?></td>
             <td><?php echo $row['iade_miktar']; ?></td>
             <td><?php echo $row['fiyat']; ?></td>
-            <td><img src="../assets/img<?= $row['image_url']; ?>" class="card-img-top" alt="..."></td>
+            <td><img src="../../img/<?= $row['image_url']; ?>" class="card-img-top" alt="..."></td>
 
           </tr>
           <!-- Diğer ürünler için aynı yapıyı kullanabilirsiniz -->
