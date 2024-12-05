@@ -14,6 +14,8 @@ if (isset($_POST['login'])) {
       $_SESSION["username"] = $username;
       $_SESSION['kullanici_id'] = $row['kullanici_id'];
       $_SESSION['name'] = $row['name'];
+      $_SESSION['email'] = $row['email'];
+
       $_SESSION['lastname'] = $row['lastname'];
 
 

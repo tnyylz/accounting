@@ -16,9 +16,13 @@ if (isset($_SESSION['kullanici_id'])) {
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/apple-icon.png">
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+
   <link rel="icon" type="image/png" href="../assets/img/favicon.png">
   <title>
-    Material Dashboard 3 by Creative Tim
+    Muhasebe Uygulaması
   </title>
   <!--     Fonts and icons     -->
   <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700,900" />
@@ -31,6 +35,13 @@ if (isset($_SESSION['kullanici_id'])) {
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
   <!-- CSS Files -->
   <link id="pagestyle" href="../assets/css/material-dashboard.css?v=3.2.0" rel="stylesheet" />
+  <style>
+    .dropdown-toggle::after {
+  display: none; /* Varsayılan okun görünmesini engeller */
+
+}
+
+  </style>
 </head>
 
 <body class="g-sidenav-show bg-gray-100">
@@ -45,16 +56,38 @@ if (isset($_SESSION['kullanici_id'])) {
     <hr class="horizontal dark mt-0 mb-2">
     <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
       <ul class="navbar-nav">
+        <!-- Şoförlerin sidebarı -->
+
+        <?php 
+        
+        if ($_SESSION['role']== 0) { 
+          
+          $sofor = mysqli_query($conn,"SELECT * FROM sofor WHERE sofor.kullanici_id = '$id' ");
+          $asd = mysqli_fetch_array($sofor);
+          $sofor_id = $asd['sofor_id'];
+
+          $result = mysqli_query($conn, "
+              SELECT bayi.*
+              FROM bayi
+              INNER JOIN guzergah ON guzergah.guzergah_id = bayi.guzergah_id
+              INNER JOIN sofor ON sofor.guzergah_id = guzergah.guzergah_id
+              WHERE sofor.sofor_id = '$sofor_id'");
+          while ($row = mysqli_fetch_array($result)) { 
+          ?>
+            <li class="nav-item">
+            <a class="nav-link text-dark" href="../pages/fatura_ekleme.php?bayi_id=<?= $row['bayi_id']; ?>">
+            <i class="material-symbols-rounded opacity-5">dashboard</i>
+            <span class="nav-link-text ms-1"><?php echo $row['bayi_adi']; ?></span>
+          </a>
+        </li>
+        <?php 
+            }
+          }
+          else { ?>
         <li class="nav-item">
           <a class="nav-link text-dark" href="../pages/dashboard.php">
             <i class="material-symbols-rounded opacity-5">dashboard</i>
             <span class="nav-link-text ms-1">Dashboard</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link text-dark" href="../pages/tables.php">
-            <i class="material-symbols-rounded opacity-5">table_view</i>
-            <span class="nav-link-text ms-1">Tables</span>
           </a>
         </li>
         <li class="nav-item">
@@ -81,12 +114,32 @@ if (isset($_SESSION['kullanici_id'])) {
             <span class="nav-link-text ms-1">RTL</span>
           </a>
         </li> -->
-        <li class="nav-item">
-          <a class="nav-link text-dark" href="../pages/notifications.php">
-            <i class="material-symbols-rounded opacity-5">notifications</i>
-            <span class="nav-link-text ms-1">Notifications</span>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle text-dark d-flex align-items-center" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="material-symbols-rounded opacity-5">notifications</i>
+              <span class="nav-link-text mx-1">Güzergahlar</span>
+              <i class="material-symbols-rounded ms-2">expand_more</i> <!-- Elle Eklenmiş Aşağı Ok -->
           </a>
-        </li>
+
+          <ul class="dropdown-menu" aria-labelledby="notificationsDropdown">
+            <?php 
+              $bayi = mysqli_query($conn, 'SELECT * FROM guzergah');
+              while ($row = mysqli_fetch_array($bayi)) {  
+                $guzergah_id = $row['guzergah_id'];
+            ?>
+              <li>
+                <!-- PHP değişkenini HTML içinde doğru şekilde birleştirme -->
+                <a class="dropdown-item d-flex align-items-center" href="marketler.php?guzergah_id=<?php echo $guzergah_id; ?>">
+                  <span><?php echo $row['guzergah_adi']; ?></span>
+                </a>
+              </li>
+            <?php } 
+              }?>
+          </ul>
+
+
+
+
         <li class="nav-item mt-3">
           <h6 class="ps-4 ms-2 text-uppercase text-xs text-dark font-weight-bolder opacity-5">Account pages</h6>
         </li>
