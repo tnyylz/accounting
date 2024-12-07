@@ -37,56 +37,63 @@ if (isset($_POST['upload-info'])) {
         }
     }
 
-    // Ürün bilgilerini saklı yordam ile veritabanına eklemek
-    if (isset($_GET['bayi_id'])) {
         $bayi_id = $_GET['bayi_id'];
 
-        // Ürünler tablosundaki her bir ürün için satış ve iade miktarlarını al
-        $query = "SELECT * FROM urun 
-                  INNER JOIN dagitim_kayitlari ON dagitim_kayitlari.urun_id = urun.urun_id 
-                  WHERE dagitim_kayitlari.bayi_id = '$bayi_id' 
-                  GROUP BY urun_adi";
-        $result_urun = mysqli_query($conn, $query);
-
-        if (!$result_urun) {
-            $_SESSION['message'] = 'Veri alınırken bir hata oluştu: ' . mysqli_error($conn);
-            header("Location: fatura_ekleme.php");
-            exit();
-        }
-
-        // Verileri diziye alıyoruz
-        $urunler = [];
-        while ($row = mysqli_fetch_array($result_urun)) {
-            $urunler[] = $row; // Her bir ürün satırını diziye ekliyoruz
-        }
-
-        // Dizi üzerinden döngü ile her ürünü işliyoruz
-        foreach ($urunler as $row) {
-            $urun_id = $row['urun_id'];
-            $satilan_miktar = $_POST["satis_" . $urun_id];
-            $iade_miktar = $_POST["iade_" . $urun_id];
-            $bugun_tarihi = date("Y-m-d");  // Bugünün tarihini alıyoruz
-
-            $stmt = $conn->prepare("CALL ekle_dagitim_kayitlari(?, ?, ?, ?, ?, ?, ?)");
-            $stmt->bind_param("iiiisis", $bayi_id, $urun_id, $satilan_miktar, $iade_miktar, $new_img_name, $_SESSION['sofor_id'], $bugun_tarihi);
-            
-            // Saklı yordamı çalıştır
-            if ($stmt->execute()) {
-                // Başarıyla eklenmiş
-            } else {
-                $_SESSION['message'] = 'Veri eklerken bir hata oluştu: ' . $stmt->error;
+        if (isset($_POST['upload-info'])) {
+            $tarih = date('Y-m-d'); // Güncel tarih
+        
+            // Tüm ürünleri listele
+            $query = "SELECT * FROM urun";
+            $result_urun = mysqli_query($conn, $query);
+        
+            if (!$result_urun) {
+                $_SESSION['message'] = 'Ürünler alınırken hata oluştu: ' . mysqli_error($conn);
                 header("Location: fatura_ekleme.php");
                 exit();
             }
-            
-            // Bağlantıyı kapat
-            $stmt->close();            
+        
+            while ($row = mysqli_fetch_assoc($result_urun)) {
+                $urun_id = $row['urun_id'];
+                $satilan_miktar = isset($_POST["satis_$urun_id"]) ? intval($_POST["satis_$urun_id"]) : 0;
+                $iade_miktar = isset($_POST["iade_$urun_id"]) ? intval($_POST["iade_$urun_id"]) : 0;
+        
+                // Eğer satış ve iade miktarları sıfır ise atla
+                if ($satilan_miktar == 0 && $iade_miktar == 0) {
+                    continue;
+                }
+        
+                // İlk kayıt kontrolü: Dağıtım kayıtlarında mevcut mu?
+                $kontrol_query = "SELECT * FROM dagitim_kayitlari WHERE bayi_id = ? AND urun_id = ?";
+                $stmt_kontrol = $conn->prepare($kontrol_query);
+                $stmt_kontrol->bind_param("ii", $bayi_id, $urun_id);
+                $stmt_kontrol->execute();
+                $result_kontrol = $stmt_kontrol->get_result();
+        
+                // Kayıt varsa güncelleme yap
+                if ($result_kontrol->num_rows > 0) {
+                    $stmt = $conn->prepare("CALL ekle_dagitim_kayitlari(?, ?, ?, ?, ?, ?, ?)");
+                    $stmt->bind_param("iiiisis", $bayi_id, $urun_id, $satilan_miktar, $iade_miktar, $new_img_name, $_SESSION['sofor_id'], $tarih);
+                } else {
+                    // Kayıt yoksa ekleme yap
+                    $stmt = $conn->prepare("CALL ekle_dagitim_kayitlari(?, ?, ?, ?, ?, ?, ?)");
+                    $stmt->bind_param("iiiisis", $bayi_id, $urun_id, $satilan_miktar, $iade_miktar, $new_img_name, $_SESSION['sofor_id'], $tarih);
+                }
+        
+                if (!$stmt->execute()) {
+                    $_SESSION['message'] = 'Veri eklerken hata oluştu: ' . $stmt->error;
+                    header("Location: fatura_ekleme.php");
+                    exit();
+                }
+        
+                $stmt->close();
+                $stmt_kontrol->close();
+            }
+        
+            $_SESSION['message'] = "Tüm veriler başarıyla kaydedildi.";
+            header("Location: fatura_ekleme.php");
+            exit();
         }
-    }
-
-    $_SESSION['message'] = "Veriler başarıyla kaydedildi.";
-    header("Location: fatura_ekleme.php");
-    exit();
+        
 }
 ?>
 
@@ -187,10 +194,11 @@ if (isset($_POST['upload-info'])) {
                     <?php
                     if (isset($_GET["bayi_id"])) {
                         $bayi_id = $_GET['bayi_id'];
-                        $query = "SELECT * FROM urun 
-                                  INNER JOIN dagitim_kayitlari ON dagitim_kayitlari.urun_id = urun.urun_id 
-                                  WHERE dagitim_kayitlari.bayi_id = '$bayi_id' 
-                                  GROUP BY urun_adi";
+                        $query = "SELECT urun_id, urun_adi 
+                            FROM urun 
+                            ORDER BY urun_adi;
+                            ;
+                            ";
                         $result_urun = mysqli_query($conn, $query);
 
                         if (!$result_urun) {
@@ -210,8 +218,8 @@ if (isset($_POST['upload-info'])) {
                     ?>
                     <tr>
                         <td><?php echo $row['urun_adi']; ?></td>
-                        <td><input type="number" name="satis_<?php echo $row['urun_id']; ?>" class="form-control" min="0" placeholder="Miktar" required></td>
-                        <td><input type="number" name="iade_<?php echo $row['urun_id']; ?>" class="form-control" min="0" placeholder="Miktar" required></td>
+                        <td><input type="number" name="satis_<?php echo $row['urun_id']; ?>" class="form-control" min="0" placeholder="Miktar" value="<?php echo $row['satilan_miktar'] ?? 0; ?>" required></td>
+                        <td><input type="number" name="iade_<?php echo $row['urun_id']; ?>" class="form-control" min="0" placeholder="Miktar" value="<?php echo $row['iade_miktar'] ?? 0; ?>" required></td>
                     </tr>
                     <?php
                         }

@@ -38,8 +38,10 @@ if (isset($_SESSION['kullanici_id'])) {
   <style>
     .dropdown-toggle::after {
   display: none; /* Varsayılan okun görünmesini engeller */
-
 }
+  li {
+    list-style-type: none;
+  }
 
   </style>
 </head>
@@ -140,7 +142,7 @@ if (isset($_SESSION['kullanici_id'])) {
 
 
 
-        <li class="nav-item mt-3">
+        <li class="nav-item mt-4">
           <h6 class="ps-4 ms-2 text-uppercase text-xs text-dark font-weight-bolder opacity-5">Account pages</h6>
         </li>
         <li class="nav-item">
@@ -155,7 +157,7 @@ if (isset($_SESSION['kullanici_id'])) {
 
             <li class="nav-item my-3">  
               <form action="../../login-signup/logout.php" method="POST">
-              <button class="nav-link  btn  bg-warning mb-0 toast-btn" type="submit" name="logout" >
+              <button class="nav-link  btn  bg-danger mb-0 toast-btn" type="submit" name="logout" >
                 Çıkış Yap</button>
               </form>
             </li>

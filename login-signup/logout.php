@@ -7,6 +7,8 @@ if (isset($_POST["logout"])) {
     unset($_SESSION["username"]);
     unset($_SESSION["kullanici_id"]);
     unset($_SESSION["sofor_id"]);
+    unset($_SESSION["password"]);
+    unset($_SESSION["email"]);
 
 
 
