@@ -23,15 +23,11 @@ if (isset($_POST['login'])) {
 
       // $_SESSION['register_time'] = $row['register_time'];
 
-      if ($row['role'] == '0') { //üye
+      if ($row['role'] == '0') { // şoför
         $_SESSION['message'] = "Hoşgeldin $username";
         header('Location: ../dashboard/pages/profile.php');
         exit(0);
-      } elseif ($row['role'] == '1') {  //admin
-        $_SESSION['message'] = "Hoşgeldin $username";
-        header('Location: ../dashboard/pages/profile.php?id=' . $row["kullanici_id"]);
-        exit(0);
-      } elseif ($row['role'] == '2') { //editör
+      } elseif ($row['role'] == '1') {  //muhasebeci
         $_SESSION['message'] = "Hoşgeldin $username";
         header('Location: ../dashboard/pages/profile.php?id=' . $row["kullanici_id"]);
         exit(0);
@@ -85,10 +81,6 @@ if (isset($_POST['login'])) {
             <input type="password" name="password" id="password" required>
             <label for="password">Şifre</label>
           </div>
-          <div class="forget">
-            <label for="remember-me" >
-              <input type="checkbox" id="remember-me" name="remember-me">Beni Hatırla     <a href="#" class="mx-4">Şifremi Unuttum</a></label>
-          </div>
           <button name="login" type="submit">Giriş Yapın</button>
           <div class="register">
             <p>Hesabınız Mı Yok <a href="signup.php">Kayıt Ol</a></p>
@@ -102,7 +94,7 @@ if (isset($_POST['login'])) {
   <?php
   if (isset($_SESSION["login"])) {
     $_SESSION['message'] = "Zaten giriş yapılmış durumda!";
-    header("Location: ../dashboard/pages/dashboard.php");
+    header("Location: ../dashboard/pages/profile.php");
     exit(0);
   }
   ?>

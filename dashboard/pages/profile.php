@@ -1,5 +1,7 @@
 <?php
 include("sidebar.php");
+$_SESSION['baslik'] = "Profil";
+
 if (isset($_POST["update_profile"])) {
     // Kullanıcıdan gelen verileri al
     $kullanici_id = $_SESSION["kullanici_id"];
@@ -11,9 +13,7 @@ if (isset($_POST["update_profile"])) {
 
 
     $duplicate = mysqli_query($conn, "SELECT * FROM kullanici WHERE username = '$username' ");
-    if (mysqli_num_rows($duplicate) > 0) {
-      $_SESSION['message'] = "Kullanıcı adı daha önceden kullanılmış!";
-    } else {
+  
     $query = "UPDATE kullanici SET name = ?, lastname = ?, email = ?, password = ?, username = ? WHERE kullanici_id = ?";
     
     // Sorguyu hazırlayın
@@ -34,7 +34,7 @@ if (isset($_POST["update_profile"])) {
         echo "Sorgu hazırlama hatası.";
     }
 }
-}
+
 ?>
 
 
@@ -42,7 +42,7 @@ if (isset($_POST["update_profile"])) {
     <?php include("navbar.php"); ?>
     
     <div class="container-fluid px-2 px-md-4">
-        <div class="page-header min-height-300 border-radius-xl mt-4" style="background-image: url('https://images.unsplash.com/photo-1531512073830-ba890ca4eba2?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80');">
+        <div class="page-header min-height-300 border-radius-xl mt-4" style="background-image: url('../../img/bg2.jpeg');">
             <span class="mask bg-gradient-dark opacity-6"></span>
         </div>
         <?php 
@@ -104,7 +104,7 @@ if (isset($_POST["update_profile"])) {
                                     <label for="password" class="form-label">Password</label>
                                     <input type="text" class="form-control" id="password" name="password" value="<?php echo $row['password']; ?>" required>
                                 </div>
-                                <button type="submit" name="update_profile" class="btn btn-info">Save Changes</button>
+                                <button type="submit" name="update_profile" class="btn btn-info">Kaydet</button>
                             </form>
                         </div>
                     </div>
@@ -121,14 +121,11 @@ if (isset($_POST["update_profile"])) {
                         <div class="card-body p-3">
                             <ul class="list-group">
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    Role: <?php 
+                                    Yetki: <?php 
                                         if ($row['role'] == 1) { echo 'Muhasebeci'; }
                                         else if ($row['role'] == 2) { echo 'Muhasebeci'; }
                                         else { echo 'Şoför'; }
                                     ?>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <button class="btn btn-warning">Deactivate Account</button>
                                 </li>
                             </ul>
                         </div>

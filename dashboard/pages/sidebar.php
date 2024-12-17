@@ -3,7 +3,8 @@ include("auth.php");
 require "../../login-signup/connect.php";
 if (isset($_SESSION['kullanici_id'])) {
   $id = $_SESSION['kullanici_id'];
-  $users = "SELECT * FROM kullanici WHERE kullanici_id = '$id' ";
+  $users = mysqli_query($conn,"SELECT * FROM kullanici WHERE kullanici_id = '$id' ");
+  $row = mysqli_fetch_array($users);
 } else {
   echo "Kullanıcı Bulunamadı";
 }
@@ -52,7 +53,7 @@ if (isset($_SESSION['kullanici_id'])) {
       <i class="fas fa-times p-3 cursor-pointer text-dark opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
       <a class="navbar-brand px-4 py-3 m-0" href="" target="_blank">
         <img src="../assets/img/logo-ct-dark.png" class="navbar-brand-img" width="26" height="26" alt="main_logo">
-        <span class="ms-1 text-sm text-dark"><?php echo $_SESSION['username'] ?></span>
+        <span class="ms-1 text-sm text-dark"><?php echo $row['name'] ?></span>
       </a>
     </div>
     <hr class="horizontal dark mt-0 mb-2">
@@ -87,21 +88,15 @@ if (isset($_SESSION['kullanici_id'])) {
           }
           else { ?>
         <li class="nav-item">
-          <a class="nav-link text-dark" href="../pages/dashboard.php">
+          <a class="nav-link text-dark" href="../pages/charts.php">
             <i class="material-symbols-rounded opacity-5">dashboard</i>
-            <span class="nav-link-text ms-1">Dashboard</span>
+            <span class="nav-link-text ms-1">Grafikler</span>
           </a>
         </li>
         <li class="nav-item">
           <a class="nav-link text-dark" href="../pages/drivers.php">
             <i class="material-symbols-rounded opacity-5">table_view</i>
             <span class="nav-link-text ms-1">Şoförler</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link text-dark" href="../pages/billing.php">
-            <i class="material-symbols-rounded opacity-5">receipt_long</i>
-            <span class="nav-link-text ms-1">Billing</span>
           </a>
         </li>
         <!-- <li class="nav-item">

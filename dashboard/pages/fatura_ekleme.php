@@ -56,6 +56,7 @@ if (isset($_POST['upload-info'])) {
                 $urun_id = $row['urun_id'];
                 $satilan_miktar = isset($_POST["satis_$urun_id"]) ? intval($_POST["satis_$urun_id"]) : 0;
                 $iade_miktar = isset($_POST["iade_$urun_id"]) ? intval($_POST["iade_$urun_id"]) : 0;
+                $tutar = ($satilan_miktar - $iade_miktar) * $row['fiyat'];
         
                 // Eğer satış ve iade miktarları sıfır ise atla
                 if ($satilan_miktar == 0 && $iade_miktar == 0) {
@@ -68,15 +69,14 @@ if (isset($_POST['upload-info'])) {
                 $stmt_kontrol->bind_param("ii", $bayi_id, $urun_id);
                 $stmt_kontrol->execute();
                 $result_kontrol = $stmt_kontrol->get_result();
-        
                 // Kayıt varsa güncelleme yap
                 if ($result_kontrol->num_rows > 0) {
-                    $stmt = $conn->prepare("CALL ekle_dagitim_kayitlari(?, ?, ?, ?, ?, ?, ?)");
-                    $stmt->bind_param("iiiisis", $bayi_id, $urun_id, $satilan_miktar, $iade_miktar, $new_img_name, $_SESSION['sofor_id'], $tarih);
+                    $stmt = $conn->prepare("CALL ekle_dagitim_kayitlari(?, ?, ?, ?, ?, ?, ?, ?)");
+                    $stmt->bind_param("iiiisisi", $bayi_id, $urun_id, $satilan_miktar, $iade_miktar, $new_img_name, $_SESSION['sofor_id'], $tarih,$tutar);
                 } else {
                     // Kayıt yoksa ekleme yap
-                    $stmt = $conn->prepare("CALL ekle_dagitim_kayitlari(?, ?, ?, ?, ?, ?, ?)");
-                    $stmt->bind_param("iiiisis", $bayi_id, $urun_id, $satilan_miktar, $iade_miktar, $new_img_name, $_SESSION['sofor_id'], $tarih);
+                    $stmt = $conn->prepare("CALL ekle_dagitim_kayitlari(?, ?, ?, ?, ?, ?, ?,?)");
+                    $stmt->bind_param("iiiisis", $bayi_id, $urun_id, $satilan_miktar, $iade_miktar, $new_img_name, $_SESSION['sofor_id'], $tarih,$tutar);
                 }
         
                 if (!$stmt->execute()) {
@@ -177,7 +177,7 @@ if (isset($_POST['upload-info'])) {
     <div class="content">
         <form action="" method="POST" enctype="multipart/form-data">
             <div class="photo-upload" onclick="document.getElementById('file').click()">
-                Fotoğraf Yükle (Tıklayın)
+                Faturayı Yükleyin (Tıklayın)
                 <input type="file" class="form-control" name="image" id="file" style="display: none;" required>
             </div>
 
@@ -188,6 +188,7 @@ if (isset($_POST['upload-info'])) {
                         <th>Ürün</th>
                         <th>Satış Miktar</th>
                         <th>İade Miktar</th>
+
                     </tr>
                 </thead>
                 <tbody>
@@ -220,6 +221,7 @@ if (isset($_POST['upload-info'])) {
                         <td><?php echo $row['urun_adi']; ?></td>
                         <td><input type="number" name="satis_<?php echo $row['urun_id']; ?>" class="form-control" min="0" placeholder="Miktar" value="<?php echo $row['satilan_miktar'] ?? 0; ?>" required></td>
                         <td><input type="number" name="iade_<?php echo $row['urun_id']; ?>" class="form-control" min="0" placeholder="Miktar" value="<?php echo $row['iade_miktar'] ?? 0; ?>" required></td>
+
                     </tr>
                     <?php
                         }
